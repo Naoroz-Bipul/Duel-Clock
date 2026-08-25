@@ -1,5 +1,4 @@
 function updateDuelClock() {
-    // Asia/Dhaka টাইমজোনে সময় গণনাকরণ
     const now = new Date();
     const dhakaTimeString = now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
     const dhakaDate = new Date(dhakaTimeString);
@@ -13,7 +12,16 @@ function updateDuelClock() {
     const minuteDeg = ((minutes + seconds / 60) / 60) * 360;
     const hourDeg = (((hours % 12) + minutes / 60) / 12) * 360;
 
-    document.getElementById('secondHand').style.transform = `rotate(${secondDeg}deg)`;
+    const secondHand = document.getElementById('secondHand');
+
+    // ৫৯ থেকে ০ সেকেন্ডে যাওয়ার সময় জাম্প এড়াতে ট্রানজিশন অন/অফ
+    if (seconds === 0) {
+        secondHand.style.transition = 'none';
+    } else {
+        secondHand.style.transition = 'transform 0.05s cubic-bezier(0.4, 2.08, 0.55, 0.44)';
+    }
+
+    secondHand.style.transform = `rotate(${secondDeg}deg)`;
     document.getElementById('minuteHand').style.transform = `rotate(${minuteDeg}deg)`;
     document.getElementById('hourHand').style.transform = `rotate(${hourDeg}deg)`;
 
@@ -28,14 +36,11 @@ function updateDuelClock() {
     document.getElementById('digitalTime').textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
     document.getElementById('ampm').textContent = ampmText;
 
-    // বাংলা ফরম্যাটে তারিখ প্রদর্শন
+    // বাংলা ফরম্যাটে তারিখ প্রদর্শন (SolaimanLipi ফন্ট সহ)
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = dhakaDate.toLocaleDateString('bn-BD', options);
     document.getElementById('digitalDate').textContent = formattedDate;
 }
 
-// প্রতি সেকেন্ডে সময় আপডেট হবে
 setInterval(updateDuelClock, 1000);
-
-// প্রথমবার পেজ লোড হবার সাথে সাথে রান করবে
 updateDuelClock();
